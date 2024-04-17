@@ -41,18 +41,29 @@ abstract class Student {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Student (String name) {
+        this.name = name;
+    }
     abstract public void printInvoice();
 
 }
 
 abstract class GraduateStudent extends Student {
-
+    public GraduateStudent (String name) {
+        super(name);
+    }
 }
 
 class UndergraduateStudent extends Student {
     @Override
     public void printInvoice() {
 
+    }
+
+    public UndergraduateStudent (String name, String courseNums, double gpa, boolean isResident) {
+        super(name);
+        // other stuff goes here
     }
 }
 
@@ -61,12 +72,22 @@ class MsStudent extends GraduateStudent {
     public void printInvoice() {
 
     }
+
+    public MsStudent (String name, String courseNums) {
+        super(name);
+        // other stuff here
+    }
 }
 
 class PhdStudent extends GraduateStudent {
     @Override
     public void printInvoice() {
 
+    }
+
+    public PhdStudent (String name, String advisor, String researchTopic, String labNums) {
+        super(name);
+        // other stuff here
     }
 }
 
@@ -231,7 +252,9 @@ class College {
         // now that the ID has been verified, we may add it to the appropriate lists:
         System.out.print("Student Type (PhD, MS, or Undergrad ");
         String type = scanner.nextLine();
-        String input = null, name, advisor, researchTopic, courseNums;
+        String input = null, name, advisor, researchTopic, labNums, courseNums;
+        double gpa = 0;
+        boolean isResident = false;
         String[] info;
 
         // check what type was inputted
@@ -245,8 +268,8 @@ class College {
                 name = info[0];
                 advisor = info[1];
                 researchTopic = info[2];
-                courseNums = info[3];
-                PhdStudent phdStudent = new PhdStudent();
+                labNums = info[3];
+                PhdStudent phdStudent = new PhdStudent(name, advisor, researchTopic, labNums);
                 allStudents.add(phdStudent);
                 phdStudents.add(phdStudent); //add remaining info before setting bI to false
                 badInput = false;
@@ -254,6 +277,26 @@ class College {
                 System.out.println("Enter Remaining information");
                 input = scanner.nextLine();
                 info = input.split("\\|");
+                name = info[0];
+                courseNums = info[1];
+                MsStudent msStudent = new MsStudent(name, courseNums);
+                allStudents.add(msStudent);
+                msStudents.add(msStudent);
+                badInput = false;
+            } else if (type.equals("Undergrad")) {
+                System.out.println("Enter Remaining information");
+                input = scanner.nextLine();
+                info = input.split("\\|");
+                name = info[0];
+                courseNums = info[1];
+                gpa = Double.parseDouble(info[2]);
+                isResident = Boolean.parseBoolean(info[3]);
+                UndergraduateStudent undergraduateStudent = new UndergraduateStudent(name, courseNums, gpa, isResident);
+                allStudents.add(undergraduateStudent);
+                ugradStudents.add(undergraduateStudent);
+                badInput = false;
+            } else {
+                System.out.println("Invalid selection, please enter either PhD, MS, or Undergrad!");
             }
             // keep bI as true if type isn't one of the supported types
         }
