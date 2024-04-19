@@ -11,6 +11,26 @@ public class ProjectDriver {
 
     }
 }
+public void courseManagement(boolean value){
+    System.out.println("Course Management Menu: ");
+    System.out.println("Choose one of the following: ");
+    System.out.println("A - Search for a class or lab using the class/lab number");
+    System.out.println("B - Delete a class");
+    System.out.println("C - Add a lab to a class");
+    System.out.println("X - Back to Main Menu");
+    while (!val){
+        try{
+            System.out.println("\t Please enter your selection:");
+            String courseSelection = scanner.nextLine();
+            val = true;
+        }
+        catch (Exception S){
+            System.out.println("Invalid input given, please try again...");
+            scanner.next();
+        }
+    }
+
+}
 
 abstract class Student {
     private String name;
