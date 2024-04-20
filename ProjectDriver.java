@@ -53,20 +53,105 @@ class UndergraduateStudent extends Student {
     @Override
     public void printInvoice() {
 
-    }
+         System.out.println("\n\n");
+         System.out.print("VALENCE COLLEGE\n");
+         System.out.print("ORLANDO FL 10101\n");
+         System.out.print("*************************\n");
+         System.out.print("Fee Invoice Prepared for Student:\n");
+         System.out.print("\n" + getID() + " - " + getName() + "\n");
+     
+         System.out.print("\n1 Credit Hour =  $" + String.format("%.2f", 120.25) + "\n");
+     
+         System.out.print("\nCRN \t\t CR_PREFIX \t\t CR_HRS\n");
+
+         double cost;
+         double total = 0;
+         int num;
+         
+
+         for(int i = 0; i < getCoursesEnrolled().size(); i++){
+
+            //course num -> course name -> course hours -> price of class
+            num = getCoursesEnrolled().get(i).getCreditHours();
+            cost = num * 120.25;
+
+            System.out.println(getCoursesEnrolled().get(i).getClassNumber() + "\t\t" + getCoursesEnrolled().get(i).getTitle() + "\t\t" + num + "\t\t" + "$"+ String.format("%.2f", cost) + "\n");
+            total += cost;
+                 
+         }
+
+         
+         System.out.printf("\n\t\tHealth & id fees\t\t$" + String.format("%.2f", 35.00) + "\n");
+         System.out.print("----------------------------------------\n");
+
+         total += 35;
+        System.out.print("\t\tTotal Payment       " + String.format("%.2f", total));
+        System.out.println("\n\n");
+     }
 }
 
 class MsStudent extends GraduateStudent {
     @Override
     public void printInvoice() {
+        System.out.println("\n\n");
+        System.out.print("VALENCE COLLEGE\n");
+        System.out.print("ORLANDO FL 10101\n");
+        System.out.print("*************************\n");
+        System.out.print("Fee Invoice Prepared for Student:\n");
+        System.out.print("\n" + getID() + " - " + getName() + "\n");
+    
+    
+        System.out.print("\n1 Credit Hour =  $" + String.format("%.2f", 300.00) + "\n");
+        System.out.print("\nCRN \t\t CR_PREFIX \t\t CR_HRS\n");
 
+        double cost;
+        double total = 0;
+        int num;
+        
+        for(int i = 0; i < getCoursesEnrolled().size(); i++){
+            num = getCoursesEnrolled().get(i).getCreditHours();
+            cost = num * 300.00;
+            System.out.println(getCoursesEnrolled().get(i).getClassNumber() + "\t\t" + getCoursesEnrolled().get(i).getTitle()+ "\t\t" + num + "\t\t" + "$"+ String.format("%.2f", cost) + "\n");
+        }
+
+        
+        System.out.printf("\n\t\tHealth & id fees\t\t$" + String.format("%.2f", 35.00) + "\n");
+        System.out.print("----------------------------------------\n");
+
+        total += 35;
+    
+        System.out.print("\t\tTotal Payment       " + String.format("%.2f", total));
+
+        System.out.println("\n\n");
     }
 }
 
 class PhdStudent extends GraduateStudent {
     @Override
     public void printInvoice() {
+        System.out.println("\n\n");
+        System.out.print("VALENCE COLLEGE\n");
+        System.out.print("ORLANDO FL 10101\n");
+        System.out.print("*************************\n");
+        System.out.print("Fee Invoice Prepared for Student:\n");
+        System.out.print("\n" + getID() + " - " + getName() + "\n");
+    
 
+        double total = 700.00;
+    
+        System.out.print("\nResearch\n");
+        System.out.println(getCoursesEnrolled().get(0).getTitle() + "\t\t " + "$" + total);
+
+        
+        System.out.printf("\n\t\tHealth & id fees      $" + String.format("%.2f", 35.00) + "\n");
+        System.out.print("----------------------------------------\n");
+
+        total += 35;
+
+    
+        System.out.print("\t\tTotal Payment       " + String.format("%.2f", total));
+
+        System.out.println("\n\n");
     }
 }
 
@@ -267,5 +352,37 @@ class College {
             }
         }
         return false;
+    }
+
+    public void printStudents(){
+        //formatting
+        System.out.println("PhD Students\n");
+        System.out.println("------------\n");
+
+        int i;
+        //for loop to print phd students
+        for(i = 0; i< phdStudents.size(); i++ ){
+            System.out.println("\t\t- " + phdStudents.get(i)+ "\n\n");
+        }
+
+
+        //formatting
+        System.out.println("MS Students\n");
+        System.out.println("------------\n");
+
+        //for loop to print masters students
+        for(i = 0; i< msStudents.size(); i++ ){
+            System.out.println("\t\t- " + msStudents.get(i)+ "\n\n");
+        }
+        
+
+        //formatting
+        System.out.println("Undergraduate Students\n");
+        System.out.println("------------\n");
+        //for loop to print undergrad students
+        for(i = 0; i< ugradStudents.size(); i++ ){
+            System.out.println("\t\t- " + ugradStudents.get(i) + "\n\n");
+        }
+
     }
 }
