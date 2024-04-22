@@ -21,16 +21,16 @@ public class ProjectDriver {
             scanner = new Scanner(System.in);
             switch (selection) {
                 case "1":
-                    // code here for student management menu
+                    studentMenu();
                     break;
                 case "2":
-                    // code here for Course management menu
+                    courseMenu();
                     break;
                 default:
-                    System.out.println("Invalid input: Please enter either 1 or 2!");
+                    System.out.println("Invalid input: Please enter either 1, 2, or 0!");
             } selection = mainMenu();
         }
-        System.out.println("Take Care!"); //
+        System.out.println("\n\nTake Care!");
     }
 
     private static String mainMenu() {
@@ -53,6 +53,7 @@ public class ProjectDriver {
         System.out.println("\tD - Print List of Students");
         System.out.println("\tE - Search for a Student");
         System.out.println("\tX - Back to Main Menu");
+        System.out.print("\n\nEnter your selection: ");
         return scanner.nextLine();
     }
 
@@ -65,27 +66,72 @@ public class ProjectDriver {
                 case "A":
                 case "a":
                     // code for adding a student
+                    System.out.println("Adding a student");
                     break;
                 case "B":
                 case "b":
                     // code for deleting a student
+                    System.out.println("Deleting a student");
                     break;
                 case "C":
                 case "c":
                     // code for printing fee invoice
+                    System.out.println("Printing fee invoice");
                     break;
                 case "D":
                 case "d":
                     // code for printing all student names
+                    System.out.println("Printing all student names");
                     break;
                 case "E":
                 case "e":
                     // code for searching for a student
+                    System.out.println("Searching students");
                     break;
                 default:
-                    System.out.println("Invalid input: Please enter A, B, C, D, or E!");
+                    System.out.println("Invalid input: Please enter A, B, C, D, E or X!");
 
             } selection = studentMenuHelper();
+        }
+    }
+
+    private static String courseMenuHelper() {
+        scanner = new Scanner(System.in);
+        System.out.println("\nCourse Management Menu:\n");
+        System.out.println("Choose one of:\n");
+        System.out.println("\tA - Search for a class or lab using the class/lab number");
+        System.out.println("\tB - Delete a class");
+        System.out.println("\tC - Add a Lecture/Lab");
+        System.out.println("\tX - Back to main menu");
+        System.out.print("\n\nEnter your selection: ");
+        return scanner.nextLine();
+    }
+
+    private static void courseMenu() {
+        String selection = courseMenuHelper();
+
+        while (!selection.equalsIgnoreCase("x")) {
+            scanner = new Scanner(System.in);
+            switch (selection) {
+                case "A":
+                case "a":
+                    // search code here
+                    System.out.println("Searching for course");
+                    break;
+                case "B":
+                case "b":
+                    // delete course code here
+                    System.out.println("Deleting course");
+                    break;
+                case "C":
+                case "c":
+                    // add course code here
+                    System.out.println("Adding course");
+                    break;
+                default:
+                    System.out.println("Invalid input: Please enter A, B, C, or X!");
+
+            } selection = courseMenuHelper();
         }
     }
 }
