@@ -1,3 +1,6 @@
+//final project
+//Group members: Christian Giovannetti, Vanessa Junco, Diana Ribot, Gabriela Komives-Prieto
+
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -8,13 +11,7 @@ public class ProjectDriver {
     private static Scanner scanner;
 
     public static void main(String[] args) {
-//        valenceCollege = new College();
-//        valenceCollege.printCourses();
-//        valenceCollege.searchByCRN("98103");
-//        valenceCollege.searchByCRN("12658");
-//        valenceCollege.searchByCRN("12345");
-//        valenceCollege.addToCourses();
-//        valenceCollege.addToCourses();
+        valenceCollege = new College();
         String selection = mainMenu();
 
         while (!selection.equalsIgnoreCase("0")) {
@@ -30,6 +27,7 @@ public class ProjectDriver {
                     System.out.println("Invalid input: Please enter either 1, 2, or 0!");
             } selection = mainMenu();
         }
+        valenceCollege.writeToFile();
         System.out.println("\n\nTake Care!");
     }
 
@@ -66,27 +64,50 @@ public class ProjectDriver {
                 case "A":
                 case "a":
                     // code for adding a student
-                    System.out.println("Adding a student");
+                    valenceCollege.addStudent();
                     break;
                 case "B":
                 case "b":
                     // code for deleting a student
-                    System.out.println("Deleting a student");
+                    valenceCollege.deleteStudent();
                     break;
                 case "C":
                 case "c":
                     // code for printing fee invoice
-                    System.out.println("Printing fee invoice");
+                    valenceCollege.printFeeInvoice();
                     break;
                 case "D":
                 case "d":
                     // code for printing all student names
-                    System.out.println("Printing all student names");
+                    valenceCollege.printAllStudents();
                     break;
                 case "E":
                 case "e":
                     // code for searching for a student
-                    System.out.println("Searching students");
+                    System.out.print("Enter Student's ID: ");
+                    String ID = scanner.nextLine();
+
+                    // verify that the ID passed in is of the form
+                    // LetterLetterDigitDigitDigitDigit
+                    String pattern = "^[A-Za-z]{2}\\d{4}$";
+                    Pattern regexPattern = Pattern.compile(pattern);
+                    Matcher matcher = regexPattern.matcher(ID);
+
+                    try {
+                        if (!matcher.matches()) {
+                            throw new IdException();
+                        }
+                    } catch (IdException e) {
+                        System.out.println(e.getMessage());
+                        return;
+                    }
+
+                    // now see if the ID even exists
+                    if(valenceCollege.searchByID(ID)) {
+                        System.out.println("Student found with ID: " + ID);
+                    } else {
+                        System.out.println("No student with ID: " + ID + " exists!");
+                    }
                     break;
                 default:
                     System.out.println("Invalid input: Please enter A, B, C, D, E or X!");
@@ -101,7 +122,7 @@ public class ProjectDriver {
         System.out.println("Choose one of:\n");
         System.out.println("\tA - Search for a class or lab using the class/lab number");
         System.out.println("\tB - Delete a class");
-        System.out.println("\tC - Add a Lecture/Lab");
+        System.out.println("\tC - Add a lab to a class or add a Lecture");
         System.out.println("\tX - Back to main menu");
         System.out.print("\n\nEnter your selection: ");
         return scanner.nextLine();
@@ -116,17 +137,19 @@ public class ProjectDriver {
                 case "A":
                 case "a":
                     // search code here
-                    System.out.println("Searching for course");
+                    System.out.print("Enter the Class/Lab Number: ");
+                    String ID = scanner.nextLine();
+                    valenceCollege.searchByCRN(ID);
                     break;
                 case "B":
                 case "b":
                     // delete course code here
-                    System.out.println("Deleting course");
+                    valenceCollege.deleteFromCourses();
                     break;
                 case "C":
                 case "c":
                     // add course code here
-                    System.out.println("Adding course");
+                    valenceCollege.addToCourses();
                     break;
                 default:
                     System.out.println("Invalid input: Please enter A, B, C, or X!");
@@ -139,8 +162,23 @@ public class ProjectDriver {
 abstract class Student {
     private String name;
     private String ID;
+    private final double fee = 35.0;
 
     private ArrayList<String> coursesEnrolled;
+
+    private LinkedHashMap<String, Course> courseLinkedHashMap;
+
+    public double getFee() {
+        return fee;
+    }
+
+    public LinkedHashMap<String, Course> getCourseLinkedHashMap() {
+        return courseLinkedHashMap;
+    }
+
+    public void setCourseLinkedHashMap(LinkedHashMap<String, Course> courseLinkedHashMap) {
+        this.courseLinkedHashMap = courseLinkedHashMap;
+    }
 
     public ArrayList<String> getCoursesEnrolled() {
         return coursesEnrolled;
@@ -171,6 +209,34 @@ abstract class Student {
         this.ID = ID;
         this.coursesEnrolled = coursesEnrolled;
     }
+
+    public void printHeader () {
+        System.out.println("\nVALENCE COLLEGE");
+        System.out.println("ORLANDO FL 10101");
+        System.out.println("---------------------\n");
+        System.out.println("Fee Invoice Prepared for Student:");
+    }
+
+    public double invoiceHelper (double studentCreditHour) {
+        LinkedHashMap<String, Course> localCourseLHM = getCourseLinkedHashMap();
+        printHeader();
+        System.out.println(getID() + "-" + getName() + "\n");
+        System.out.printf("1 Credit Hour = $ %.2f\n\n", studentCreditHour);
+        System.out.println("CRN\t\tCR_PREFIX\t\tCR_HOURS");
+        double total = 0;
+
+        for (String lectureCRN : getCoursesEnrolled()) {
+            Lecture lecture = (Lecture) localCourseLHM.get(lectureCRN);
+            System.out.printf("%s\t%s\t\t\t%d\t\t\t$ %.2f\n",
+                    lecture.getCrn(), lecture.getPrefix(), lecture.getCreditHours(), studentCreditHour * lecture.getCreditHours());
+            total += studentCreditHour * lecture.getCreditHours();
+        }
+        System.out.printf("\n\t\t\t\tHealth & id fees\t$ %.2f\n\n", getFee());
+        System.out.println("--------------------------------------------");
+        return total;
+    }
+
+
     abstract public void printInvoice();
 
 }
@@ -184,14 +250,26 @@ abstract class GraduateStudent extends Student {
 class UndergraduateStudent extends Student {
     private double gpa;
     private boolean isResident;
+    private double ugradCreditHour = 120.25;
     public UndergraduateStudent (String name, String ID, double gpa, boolean isResident, ArrayList<String> coursesEnrolled) {
         super(name, ID, coursesEnrolled);
         this.gpa = gpa;
         this.isResident = isResident;
+        if (!isResident) {
+            ugradCreditHour *= 2;
+        }
     }
     @Override
     public void printInvoice() {
-
+        double total = invoiceHelper(ugradCreditHour);
+        if (gpa >= 3.5 && total > 500.0) {
+            double discountedTotal = .25 * total;
+            System.out.println("\t\t\t\t\t\t\t\t\t$ " + total);
+            System.out.printf("\t\t\t\t\t\t\t\t   -$ %.2f\n",discountedTotal);
+            System.out.println("\t\t\t\t\t\t\t\t  ----------");
+            total -= discountedTotal;
+        }
+        System.out.printf("\t\t\t\tTOTAL PAYMENTS\t\t$ %.2f\n\n", total);
     }
 }
 
@@ -200,15 +278,18 @@ class MsStudent extends GraduateStudent {
     public MsStudent (String name, String ID, ArrayList<String> coursesEnrolled) {
         super(name, ID, coursesEnrolled);
     }
+    private final double msCreditHour = 300.0;
     @Override
     public void printInvoice() {
-
+        double total = invoiceHelper(msCreditHour);
+        System.out.printf("\t\t\t\tTOTAL PAYMENTS\t\t$ %.2f\n\n", total);
     }
 }
 
 class PhdStudent extends GraduateStudent {
     private String advisor;
     private String researchTopic;
+    private double researchFee = 700.0;
     public PhdStudent (String name, String ID, String advisor, String researchTopic, ArrayList<String> labsSupervising) {
         super(name, ID,null);
         this.advisor = advisor;
@@ -227,12 +308,24 @@ class PhdStudent extends GraduateStudent {
 
     @Override
     public void printInvoice() {
+        printHeader();
+        System.out.println(getID() + "-" + getName() + "\n");
+        System.out.println("RESEARCH");
+        if (labsSupervising.size() > 2) {
+            researchFee = 0;
+        } else if (labsSupervising.size() == 2) {
+            researchFee *= .5;
+        }
 
+        System.out.println(researchTopic + "\t\t\t$ " + researchFee);
+        System.out.printf("\n\t\t\t\tHealth & id fees\t$ %.2f\n\n", getFee());
+        System.out.println("--------------------------------------------");
+        System.out.printf("\t\t\t\tTOTAL PAYMENTS\t\t$ %.2f\n\n", getFee() + researchFee);
     }
 }
 
 abstract class Course {
-
+    // a class that enables lectures and labs to be added to a single hashMap
 }
 
 class Lecture extends Course{
@@ -376,8 +469,14 @@ class Lecture extends Course{
         this.hasLabs = false;
     }
 
+    // 89745,COT6578,Advanced Computer theory,Graduate,F2F,PSY-108,No,4
     public String toString() {
-        return crn + ", " + prefix + ", " + name + ", " + type + ", " + labCRNS;
+        if (modality.replaceAll("\\s", "").equalsIgnoreCase("online")) {
+            return crn + "," + prefix + "," + name + "," + type + "," + modality + "," + creditHours;
+        } else {
+            return crn + "," + prefix + "," + name + "," + type + "," + modality + "," + classroom
+                    + "," + (hasLabs ? "Yes" : "No") + "," + creditHours;
+        }
     }
 }
 
@@ -503,11 +602,7 @@ class College {
             }
         }
         scanner.close();
-//        // testing print, can go after test
-//        for (Map.Entry<String, Course> entry : courseHashMap.entrySet()) {
-//            Course temp1 = entry.getValue();
-//            System.out.println(entry.getKey() + ":" + temp1);
-//        }
+
     }
 
     public void searchByCRN (String CRN) {
@@ -528,7 +623,7 @@ class College {
 
     public void addToCourses () {
         scanner = new Scanner(System.in);
-        System.out.println("Enter Lab or Lecture: ");
+        System.out.print("Enter Lab or Lecture: ");
         String choice = scanner.nextLine();
         String lecCRN;
         String input;
@@ -539,6 +634,12 @@ class College {
             if (courseHashMap.containsKey(lecCRN) && courseHashMap.get(lecCRN) instanceof Lecture) {
                 // add to lecture
                 Lecture lec = (Lecture) courseHashMap.get(lecCRN);
+
+                if (!lec.isHasLabs()) {
+                    System.out.println("Cannot add a lab to a course with labs disabled!");
+                    return;
+                }
+
                 System.out.println(lecCRN + " (" + lec.getName() + ") is a valid course. " +
                         "Enter the rest of the information in the form of labCRN,location." );
                 input = scanner.nextLine();
@@ -547,15 +648,18 @@ class College {
                 courseHashMap.put(items[0], new Lab(items[0], items[1], lecCRN));
                 // update the lecture object's lab list
                 lec.getLabCRNS().add(items[0]);
+                System.out.println("Lab added.");
+            } else {
+                System.out.println("No Such Lecture Exists!");
             }
         } else if (choice.equalsIgnoreCase("lecture")) {
-            System.out.println("Enter the Lecture Number: ");
+            System.out.print("Enter the Lecture Number: ");
             lecCRN = scanner.nextLine();
             if (!courseHashMap.containsKey(lecCRN)) {
                 System.out.println(lecCRN + " is valid. " +
                         "Enter the rest of the information in form of one of the following:\n");
-                System.out.println("If course is not online: prefix,name,type,modality,location,yes/no,creditHours");
-                System.out.println("If course is online: prefix,name,type,modality,creditHours");
+                System.out.println("If course is not online: \tprefix,name,type,modality,location,yes/no,creditHours");
+                System.out.println("If course is online: \tprefix,name,type,modality,creditHours");
                 input = scanner.nextLine();
                 items = input.split(",");
                 if (items[3].replaceAll("\\s", "").equalsIgnoreCase("online")) {
@@ -567,13 +671,13 @@ class College {
                     courseHashMap.put(lecCRN, new Lecture(lecCRN, items[0], items[1],
                             items[2], items[3], items[4], hasLab, Integer.parseInt(items[6].replaceAll("\\s", ""))));
                 }
+                System.out.println("\nCourse added.");
+            } else {
+                System.out.println("A lecture with that number already exists!");
             }
+        } else {
+            System.out.println("Invalid input: Please enter either Lecture or Lab!");
         }
-//        // testing print, can go after test
-//        for (Map.Entry<String, Course> entry : courseHashMap.entrySet()) {
-//            Course temp1 = entry.getValue();
-//            System.out.println(entry.getKey() + ":" + temp1);
-//        }
     }
 
     public void printCourses () {
@@ -593,7 +697,7 @@ class College {
 
     public void deleteFromCourses () {
         scanner = new Scanner(System.in);
-        System.out.println("Enter the Class/Lab Number: ");
+        System.out.print("Enter the Class/Lab Number: ");
         String courseCRN = scanner.nextLine();
 
         Course course = courseHashMap.get(courseCRN);
@@ -606,13 +710,14 @@ class College {
             Lecture lecture = (Lecture) course;
             if (lecture.getStudentsTakingCourse().isEmpty()) {
                 if (lecture.isHasLabs()) {
-                    for (String labCRN : lecture.getLabCRNS()) {
-                        deleteLab(labCRN);
-                    }
+                    System.out.println("\nCannot delete course with labs enabled!");
+                    return;
+                } else {
+                    courseHashMap.remove(courseCRN);
+                    System.out.println("\nCourse deleted.");
                 }
-                courseHashMap.remove(courseCRN);
             } else {
-                System.out.println("Cannot delete course when one or more students are enrolled in it!");
+                System.out.println("\nCannot delete course when one or more students are enrolled in it!");
             }
         } else {
             deleteLab(courseCRN);
@@ -627,6 +732,7 @@ class College {
             ((PhdStudent) studentHashMap.get(phdCRN)).getLabsSupervising().remove(labCrn);
         }
         courseHashMap.remove(labCrn);
+        System.out.println("Lab deleted.");
     }
 
     // Student stuff starts here
@@ -650,12 +756,12 @@ class College {
                 throw new IdException();
             }
         } catch (IdException e) {
-            e.getMessage();
+            System.out.println(e.getMessage());
             return;
         }
 
         // now that the ID has been verified, we may add it to the appropriate lists:
-        System.out.print("Student Type (PhD, MS, or Undergrad ");
+        System.out.print("Student Type (PhD, MS, or Undergrad): ");
         String type = scanner.nextLine();
         String input = null;
         String name, advisor, researchTopic;
@@ -684,6 +790,7 @@ class College {
                 badInput = false;
             } else if (type.equalsIgnoreCase("ms")) {
                 System.out.println("Enter Remaining information in the form: name|lectureCRN1,lectureCRN2,...,lectureCRNX");
+                System.out.println("Note that course CRNs that belong to undergraduate courses will be ignored.");
                 input = scanner.nextLine();
                 // get rid of unnecessary spaces
                 input = input.replaceAll("\\s\\|", "|").replaceAll("\\|\\s", "|");
@@ -710,6 +817,7 @@ class College {
                 badInput = false;
             } else if (type.equalsIgnoreCase("undergrad")) {
                 System.out.println("Enter Remaining information in the form: name|gpa|true/false|lectureCRN1,lectureCRN2,...,lectureCRNX");
+                System.out.println("Note that course CRNs that belong to graduate courses will be ignored.");
                 input = scanner.nextLine();
                 // get rid of unnecessary spaces
                 input = input.replaceAll("\\s\\|", "|").replaceAll("\\|\\s", "|");
@@ -757,7 +865,7 @@ class College {
                 throw new IdException();
             }
         } catch (IdException e) {
-            e.getMessage();
+            System.out.println(e.getMessage());
             return;
         }
 
@@ -767,12 +875,103 @@ class College {
             return;
         }
 
-        // start here
+        // deal with both the phd case and the ms/ugrad case
+
+        Student student = studentHashMap.get(ID);
+        // phd case
+        if (student instanceof PhdStudent) {
+            PhdStudent phdStudent = (PhdStudent) student;
+
+            // update Labs this student is supervising
+            for (String labCRN : phdStudent.getLabsSupervising()) {
+                Lab lab = (Lab) courseHashMap.get(labCRN);
+                lab.getPhdSupervising().remove(ID);
+            }
+
+            studentHashMap.remove(ID);
+        } else {
+            // ms/ugrad case
+            for (String lectureCRN : student.getCoursesEnrolled()) {
+                Lecture lecture = (Lecture) courseHashMap.get(lectureCRN);
+                lecture.getStudentsTakingCourse().remove(ID);
+            }
+
+            studentHashMap.remove(ID);
+        }
 
     }
 
     public boolean searchByID (String ID) {
         return studentHashMap.containsKey(ID);
+    }
+
+    public void printAllStudents () {
+        System.out.println("PhD Students");
+        System.out.println("------------");
+        for (Map.Entry<String, Student> entry : studentHashMap.entrySet()) {
+            Student student = entry.getValue();
+            if (student instanceof PhdStudent) {
+                System.out.println("\t- " + student.getName());
+            }
+        }
+
+        System.out.println("\nMS Students");
+        System.out.println("-----------");
+        for (Map.Entry<String, Student> entry : studentHashMap.entrySet()) {
+            Student student = entry.getValue();
+            if (student instanceof MsStudent) {
+                System.out.println("\t- " + student.getName());
+            }
+        }
+
+        System.out.println("\nUndergraduate Students");
+        System.out.println("----------------------");
+        for (Map.Entry<String, Student> entry : studentHashMap.entrySet()) {
+            Student student = entry.getValue();
+            if (student instanceof UndergraduateStudent) {
+                System.out.println("\t- " + student.getName());
+            }
+        }
+    }
+
+    public void printFeeInvoice () {
+        scanner = new Scanner(System.in);
+        System.out.println("Enter the ID of the student: ");
+        String studentID = scanner.nextLine();
+        if (studentHashMap.containsKey(studentID)) {
+            Student student = studentHashMap.get(studentID);
+            student.setCourseLinkedHashMap(courseHashMap);
+            student.printInvoice();
+        } else {
+            System.out.println("No student exists with that ID!");
+        }
+    }
+
+    public void writeToFile () {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("lec.txt"));
+            for (Map.Entry<String, Course> entry : courseHashMap.entrySet()) {
+                Course course = entry.getValue();
+                if (course instanceof Lecture) {
+                    Lecture lecture = (Lecture) course;
+                    writer.write(lecture.toString());
+                    writer.newLine();
+
+                    if (lecture.isHasLabs()) {
+                        for (String crn : lecture.getLabCRNS()) {
+                            Course labCourse = courseHashMap.get(crn);
+                            if (labCourse != null) {
+                                writer.write(labCourse.toString());
+                                writer.newLine();
+                            }
+                        }
+                    }
+                }
+            }
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("There was a problem writing to \"lec.txt\"");
+        }
     }
 
 }
