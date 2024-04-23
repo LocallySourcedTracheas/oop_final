@@ -123,6 +123,7 @@ public class ProjectDriver {
         System.out.println("\tA - Search for a class or lab using the class/lab number");
         System.out.println("\tB - Delete a class");
         System.out.println("\tC - Add a lab to a class or add a Lecture");
+        System.out.println("\tD - Print all classes (and their associated labs)");
         System.out.println("\tX - Back to main menu");
         System.out.print("\n\nEnter your selection: ");
         return scanner.nextLine();
@@ -151,8 +152,13 @@ public class ProjectDriver {
                     // add course code here
                     valenceCollege.addToCourses();
                     break;
+                case "D":
+                case "d":
+                    // print course code here
+                    valenceCollege.printCourses();
+                    break;
                 default:
-                    System.out.println("Invalid input: Please enter A, B, C, or X!");
+                    System.out.println("Invalid input: Please enter A, B, C, D, or X!");
 
             } selection = courseMenuHelper();
         }
@@ -233,7 +239,7 @@ abstract class Student {
         }
         System.out.printf("\n\t\t\t\tHealth & id fees\t$ %.2f\n\n", getFee());
         System.out.println("--------------------------------------------");
-        return total;
+        return total + getFee();
     }
 
 
@@ -317,7 +323,7 @@ class PhdStudent extends GraduateStudent {
             researchFee *= .5;
         }
 
-        System.out.println(researchTopic + "\t\t\t$ " + researchFee);
+        System.out.println(researchTopic + "\t\t\t\t\t\t\t\t$ " + researchFee);
         System.out.printf("\n\t\t\t\tHealth & id fees\t$ %.2f\n\n", getFee());
         System.out.println("--------------------------------------------");
         System.out.printf("\t\t\t\tTOTAL PAYMENTS\t\t$ %.2f\n\n", getFee() + researchFee);
@@ -528,7 +534,7 @@ class Lab extends Course {
     }
 
     public String toString () {
-        return labCRN + ", " + location;
+        return (labCRN + "," + location).replaceAll("\\s", "");
     }
 }
 
@@ -936,7 +942,7 @@ class College {
 
     public void printFeeInvoice () {
         scanner = new Scanner(System.in);
-        System.out.println("Enter the ID of the student: ");
+        System.out.print("Enter the ID of the student: ");
         String studentID = scanner.nextLine();
         if (studentHashMap.containsKey(studentID)) {
             Student student = studentHashMap.get(studentID);
